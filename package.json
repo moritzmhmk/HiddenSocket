@@ -2,8 +2,13 @@
   "name": "hidden-socket",
   "version": "0.0.1",
   "description": "clone of Hidden in Plain Sight with socket.IO",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.13.3",
     "socket.io": "^1.3.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:moritzmhmk/HiddenSocket.git"
   }
 }
