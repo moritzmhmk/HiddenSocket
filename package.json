@@ -10,5 +10,8 @@
   "repository": {
     "type": "git",
     "url": "git@github.com:moritzmhmk/HiddenSocket.git"
+  },
+  "scripts": {
+    "start": "node index.js"
   }
 }
