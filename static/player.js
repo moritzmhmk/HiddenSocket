@@ -3,6 +3,6 @@ Player = function() {
 };
 
 Player.prototype.move = function(delta) {
-  this.pos.x+=delta.x;
-  this.pos.y+=delta.y;
+  this.pos.x += delta.x;
+  this.pos.y += delta.y;
 }
