@@ -1,90 +1,11 @@
 <html>
 <head>
+  <script src="input.js"></script>
   <script type="text/javascript">
+  "use strict";
      function test() {
-      console.log("test");
-
-      var buttonInputStates = {};
-
-      window.addEventListener("keydown", function(e) { key("down", e) });
-      window.addEventListener("keyup", function(e) { key("up", e) });
-
-      var keyToButtonInput = {
-        37:"left",  // LEFT arrow
-        38:"up",  // UP arrow
-        39:"right",  // right arrow
-        40:"down", // down arrow
-        65:"left", // A
-        87:"up",  // W
-        68:"right", // D
-        83:"down"  // S
-      };
-
-      function key(state, event) {
-        if(keyToButtonInput[event.keyCode] === undefined)
-          return;
-        dispatchUserButtonInputEvent("keyboard", keyToButtonInput[event.keyCode], state=="down");
-      }
-
-      gamepadIntervals = {}
-      gamepadStates = {}
-      window.addEventListener("gamepadconnected", function(e) {
-        console.log("Gamepad "+e.gamepad.index+" connected!")
-        checkGamepadState(e.gamepad.index);
-      });
-
-      function checkGamepadState(index) {
-        gp = navigator.getGamepads()[index];
-        if(gp === undefined) {
-          console.log("Gamepad "+index+" disconnected!")
-          return;
-        }
-        console.debug("checking", gp)
-        if(gamepadStates[gp.index] === undefined)
-          gamepadStates[gp.index] = {buttons:[], axes:[]}
-        /*for(var i=0; i<gp.axes.length; i++) {
-          if(gamepadStates[gp.index].axes[i] !== undefined && gamepadStates[gp.index].axes[i] != gp.axes[i])
-            axisChanged(gp, i, gp.axes[i]);
-          gamepadStates[gp.index].axes[i] = gp.axes[i];
-        }*/
-        for(var i=0; i<gp.buttons.length; i++) {
-          if(gamepadStates[gp.index].buttons[i] !== undefined && gamepadStates[gp.index].buttons[i] != gp.buttons[i].pressed)
-            buttonChanged(gp, i, gp.buttons[i].pressed);
-          gamepadStates[gp.index].buttons[i] = gp.buttons[i].pressed;
-        }
-        window.setTimeout(function() {checkGamepadState(index);}, 100);
-      }
-
-
-      var gamepadButtonToButtonInput = {
-        0: "left",
-        1: "up",
-        2: "right",
-        3: "down"
-      }
-      function buttonChanged(gamepad, button, state) {
-        console.log("button \"" + button + "\" was "+(state?"pressed":"released"));
-        if(gamepadButtonToButtonInput[button] === undefined)
-          return;
-        dispatchUserButtonInputEvent("gamepad_"+gamepad.index, gamepadButtonToButtonInput[button], state);
-      }
-
-
-      function dispatchUserButtonInputEvent(source, input, state) {
-        if(buttonInputStates[source] === undefined)
-          buttonInputStates[source] = {}
-        if(buttonInputStates[source][input] == state)
-          return;
-        buttonInputStates[source][input] = state;
-
-        var userButtonInputEvent = new CustomEvent(
-          "userbuttoninput",
-          {"detail": {"source":source, "input":input, "state": state,}}
-        );
-
-        window.dispatchEvent(userButtonInputEvent);
-      }
-
+      keyboardInput.setup();
+      gamepadInput.setup();
       window.addEventListener("userbuttoninput", doSomething);
 
       function doSomething(e) {
