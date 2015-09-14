@@ -19,7 +19,6 @@ function render () {
     if (playerId == player.id) continue;
     var opl = players[playerId]
 
-    var pli = parseInt(playerId) + 1
     document.getElementById('player_' + playerId).style.left = opl.x * 10
     document.getElementById('player_' + playerId).style.top = opl.y * 10
   }

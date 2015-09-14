@@ -31,13 +31,19 @@ Player.prototype.initEvents = function () {
   })
 
   this.socket.on('newPlayer', function (playerId) {
-    console.log('new player!')
+    console.log('new player', playerId)
     var div = document.createElement('div')
     div.id = 'player_' + playerId
     div.className += 'player'
     div.className += ' foreign'
 
     document.body.appendChild(div)
+  })
+
+  this.socket.on('removePlayer', function (playerId) {
+    var pl = document.getElementById('player_' + playerId)
+    pl.parentNode.removeChild(pl)
+    if (playerId < that.id) that.id--
   })
 }
 
