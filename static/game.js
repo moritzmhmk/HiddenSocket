@@ -1,4 +1,5 @@
-var player = new Player()
+var player = new Player(io())
+var players = []
 
 window.onload = function () {
   keyboardInput.setup()
@@ -9,12 +10,19 @@ window.onload = function () {
 var lastRender = Date.now()
 function render () {
   var dt = Date.now() - lastRender
-  var fps = 1000 / dt
-
   window.requestAnimationFrame(render)
 
   document.getElementById('local').style.left = player.pos.x * 10
   document.getElementById('local').style.top = player.pos.y * 10
+
+  for (var playerId in players) {
+    if (playerId == player.id) continue;
+    var opl = players[playerId]
+
+    var pli = parseInt(playerId) + 1
+    document.getElementById('player_' + playerId).style.left = opl.x * 10
+    document.getElementById('player_' + playerId).style.top = opl.y * 10
+  }
 
   lastRender += dt
 }
