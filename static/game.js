@@ -15,13 +15,12 @@ function render () {
   document.getElementById('local').style.left = player.pos.x * 10
   document.getElementById('local').style.top = player.pos.y * 10
 
-  for (var playerId in players) {
-    if (playerId == player.id) continue;
-    var opl = players[playerId]
+  players.forEach(function (ele, i, arr) {
+    if (player.id === i) return
 
-    document.getElementById('player_' + playerId).style.left = opl.x * 10
-    document.getElementById('player_' + playerId).style.top = opl.y * 10
-  }
+    document.getElementById('player_' + i).style.left = ele.x * 10
+    document.getElementById('player_' + i).style.top = ele.y * 10
+  })
 
   lastRender += dt
 }
