@@ -1,7 +1,12 @@
 var Player = function (socket) {
   this.velocity = 0.01
   this.pos = {x: 0, y: 0}
+  this.predicted_pos = {x: 0, y: 0}
   this.movement = {up: false, down: false, right: false, left: false}
+
+  this.msPerTick = 15
+  this.ticksPerServerUpdate = 5
+  this.recentTicks = []
 
   this.socket = socket
   this.initEvents()
@@ -9,7 +14,6 @@ var Player = function (socket) {
   this.lastUpdate = Date.now()
   this.update()
 
-  this.recentActions = []
   this.serverUpdate()
 
   this.id = undefined
@@ -21,12 +25,21 @@ Player.prototype.initEvents = function () {
   this.socket.on('initState', function (info) {
     that.id = info.id
     that.pos = info.positions[that.id]
+    that.predicted_pos = that.pos
 
     players = info.positions
   })
 
   this.socket.on('newState', function (positions) {
     that.pos = positions[that.id]
+    var max_offset = 10
+    if(Math.abs(that.pos.x - that.predicted_pos.x) > max_offset ||
+       Math.abs(that.pos.y - that.predicted_pos.y) > max_offset) {
+      that.predicted_pos = that.pos
+    } else {
+      that.predicted_pos.x -= (that.predicted_pos.x - that.pos.x) / 2
+      that.predicted_pos.y -= (that.predicted_pos.y - that.pos.y) / 2
+    }
     players = positions
   })
 
@@ -48,10 +61,8 @@ Player.prototype.initEvents = function () {
 }
 
 Player.prototype.serverUpdate = function () {
-  this.socket.emit('lookWhatIdid', this.recentActions)
-  this.recentActions = []
-
-  setTimeout(this.serverUpdate.bind(this), 45)
+  this.socket.emit('update', this.recentTicks)
+  this.recentTicks = []
 }
 
 Player.prototype.update = function () {
@@ -59,32 +70,37 @@ Player.prototype.update = function () {
   this.lastUpdate += dt
 
   this.move(dt)
-
-  setTimeout(this.update.bind(this), 15)
+  if(this.recentTicks.length >= 3) {
+    this.serverUpdate()
+  }
+  setTimeout(this.update.bind(this), this.msPerTick)
 }
 
 Player.prototype.move = function (dt) {
-  var prePos = {x: this.pos.x, y: this.pos.y}
+  var tick = {
+    id: 42, // TODO
+    action: {}
+  }
 
+  var prediction = dt / this.msPerTick
+  console.log(prediction + '(' + dt + '/' + this.msPerTick + ')')
   if (this.movement['up']) {
-    this.pos.y -= this.velocity * dt
+    tick.action['up'] = true
+    this.predicted_pos.y -= prediction
   }
   if (this.movement['down']) {
-    this.pos.y += this.velocity * dt
+    tick.action['down'] = true
+    this.predicted_pos.y += prediction
   }
   if (this.movement['left']) {
-    this.pos.x -= this.velocity * dt
+    tick.action['left'] = true
+    this.predicted_pos.x -= prediction
   }
   if (this.movement['right']) {
-    this.pos.x += this.velocity * dt
+    tick.action['right'] = true
+    this.predicted_pos.x += prediction
   }
-
-  if (this.pos.x !== prePos.x || this.pos.y !== prePos.y) {
-    this.recentActions.push({
-      x: this.pos.x - prePos.x,
-      y: this.pos.y - prePos.y
-    })
-  }
+  this.recentTicks.push(tick)
 }
 
 Player.prototype.updateMovement = function (e) {
