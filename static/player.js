@@ -32,7 +32,7 @@ Player.prototype.initEvents = function () {
 
   this.socket.on('newState', function (positions) {
     that.pos = positions[that.id]
-    var max_offset = 10
+    var max_offset = 50
     if(Math.abs(that.pos.x - that.predicted_pos.x) > max_offset ||
        Math.abs(that.pos.y - that.predicted_pos.y) > max_offset) {
       that.predicted_pos = that.pos
@@ -82,24 +82,39 @@ Player.prototype.move = function (dt) {
     action: {}
   }
 
-  var prediction = dt / this.msPerTick
-  console.log(prediction + '(' + dt + '/' + this.msPerTick + ')')
-  if (this.movement['up']) {
-    tick.action['up'] = true
-    this.predicted_pos.y -= prediction
+  var prediction = dt / this.msPerTick * 10
+  // console.log(prediction + '(' + dt + '/' + this.msPerTick + ')')
+
+  // TODO move the "dir" calculation to input.js
+  var dir = undefined
+
+  this.movement['up'] = this.movement['down'] ? false : this.movement['up']
+  this.movement['down'] = this.movement['up'] ? false : this.movement['down']
+  this.movement['left'] = this.movement['right'] ? false : this.movement['left']
+  this.movement['right'] = this.movement['left'] ? false : this.movement['right']
+
+  dir = this.movement['up'] ? 0 : dir
+  dir = this.movement['right'] ? 90 : dir
+  dir = this.movement['down'] ? 180 : dir
+  dir = this.movement['left'] ? 270 : dir
+  dir = this.movement['up'] && this.movement['right'] ? 45 : dir
+  dir = this.movement['down'] && this.movement['right'] ? 135 : dir
+  dir = this.movement['down'] && this.movement['left'] ? 225 : dir
+  dir = this.movement['up'] && this.movement['left'] ? 315 : dir
+
+  var dx, dy
+  if (dir === undefined) {
+    dx = dy = 0
+  } else {
+    dx = Math.round(Math.sin(dir * (Math.PI / 180)) * prediction)
+    dy = -Math.round(Math.cos(dir * (Math.PI / 180)) * prediction)
   }
-  if (this.movement['down']) {
-    tick.action['down'] = true
-    this.predicted_pos.y += prediction
-  }
-  if (this.movement['left']) {
-    tick.action['left'] = true
-    this.predicted_pos.x -= prediction
-  }
-  if (this.movement['right']) {
-    tick.action['right'] = true
-    this.predicted_pos.x += prediction
-  }
+  console.log(dir, dx, dy)
+  this.predicted_pos.x += dx
+  this.predicted_pos.y += dy
+
+  tick.dir = dir
+
   this.recentTicks.push(tick)
 }
 
